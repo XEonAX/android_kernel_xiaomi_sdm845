@@ -728,7 +728,7 @@ static int ipa3_wwan_add_ul_flt_rule_to_ipa(void)
 		retval = -EFAULT;
 	}
 
-	req->install_status = QMI_RESULT_SUCCESS_V01;
+	req->install_status = IPA_QMI_RESULT_SUCCESS_V01;
 	req->rule_id_valid = 1;
 	req->rule_id_len = rmnet_ipa3_ctx->num_q6_rules;
 	for (i = 0; i < rmnet_ipa3_ctx->num_q6_rules; i++) {
@@ -3910,6 +3910,15 @@ int rmnet_ipa3_send_lan_client_msg(
 		IPAWANERR("Can't allocate memory for tether_info\n");
 		return -ENOMEM;
 	}
+
+	if (data->client_event != IPA_PER_CLIENT_STATS_CONNECT_EVENT &&
+		data->client_event != IPA_PER_CLIENT_STATS_DISCONNECT_EVENT) {
+		IPAWANERR("Wrong event given. Event:- %d\n",
+			data->client_event);
+		kfree(lan_client);
+		return -EINVAL;
+	}
+	data->lan_client.lanIface[IPA_RESOURCE_NAME_MAX-1] = '\0';
 	memset(&msg_meta, 0, sizeof(struct ipa_msg_meta));
 	memcpy(lan_client, &data->lan_client,
 		sizeof(struct ipa_lan_client_msg));

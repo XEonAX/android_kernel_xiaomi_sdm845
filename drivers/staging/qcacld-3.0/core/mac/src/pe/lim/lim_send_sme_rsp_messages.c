@@ -1514,9 +1514,8 @@ lim_send_sme_deauth_ntf(tpAniSirGlobal pMac, tSirMacAddr peerMacAddr,
 	}
 
 	/*Delete the PE session  created */
-	if (psessionEntry != NULL) {
+	if ((psessionEntry != NULL) && LIM_IS_STA_ROLE(psessionEntry))
 		pe_delete_session(pMac, psessionEntry);
-	}
 
 	lim_send_sme_disassoc_deauth_ntf(pMac, QDF_STATUS_SUCCESS,
 					 (uint32_t *) pMsg);
@@ -2519,6 +2518,9 @@ lim_send_sme_ap_channel_switch_resp(tpAniSirGlobal pMac,
 	bool is_ch_dfs = false;
 	enum phy_ch_width ch_width;
 	uint8_t ch_center_freq_seg1;
+
+	qdf_runtime_pm_allow_suspend(&psessionEntry->ap_ecsa_runtime_lock);
+	qdf_wake_lock_release(&psessionEntry->ap_ecsa_wakelock, 0);
 
 	pSmeSwithChnlParams = (tSwitchChannelParams *)
 			      qdf_mem_malloc(sizeof(tSwitchChannelParams));
